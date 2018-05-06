@@ -94,8 +94,25 @@ set(FILES
   ./source/SubproblemCondor.cpp
   ./source/SubprobStats.cpp
   ./source/utils.cpp
+  ./source/pseudotree.cpp
 )
 
 # Main executable and library dependencies
-add_executable(daoopt daoopt.cpp ${FILES})
-target_link_libraries(daoopt ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+set (CMAKE_INSTALL_PREFIX ../../..)
+#link_directories(../../../lib64)
+include_directories(../../include)
+
+project(pseudotree)
+add_library(pseudotree STATIC ${FILES})
+target_link_libraries(pseudotree libbn-to-cnf.a)
+#target_link_libraries(pseudotree ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+
+set_target_properties(pseudotree PROPERTIES PUBLIC_HEADER "./include/Pseudotree.h")
+install(TARGETS pseudotree
+    ARCHIVE DESTINATION "lib64"
+    LIBRARY DESTINATION "lib64"
+    PUBLIC_HEADER DESTINATION "include/pseudotree"
+)
+
+
+
