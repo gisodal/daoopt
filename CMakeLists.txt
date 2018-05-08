@@ -63,54 +63,32 @@ add_subdirectory(lib)
 set(LIBS Gzstream Sls4mpe Mex Cvo)
 
 # Main daoopt source files
-set(FILES
-  ./source/BestFirst.cpp
-  ./source/BoundPropagator.cpp
-  ./source/BoundPropagatorMaster.cpp
-  ./source/BranchAndBound.cpp
-  ./source/BranchAndBoundMaster.cpp
-  ./source/BranchAndBoundRotate.cpp
-  ./source/BranchAndBoundSampler.cpp
-  ./source/CacheTable.cpp
-  ./source/Function.cpp
-  ./source/Graph.cpp
-  ./source/LearningEngine.cpp
-  ./source/LimitedDiscrepancy.cpp
-  ./source/Main.cpp
-  ./source/MiniBucket.cpp
-  ./source/MiniBucketElim.cpp
-  ./source/MiniBucketElimMplp.cpp
-  ./source/ParallelManager.cpp
-  ./source/Problem.cpp
-  ./source/ProgramOptions.cpp
-  ./source/Pseudotree.cpp
-  ./source/Random.cpp
-  ./source/Search.cpp
-  ./source/SearchMaster.cpp
-  ./source/SearchNode.cpp
-  ./source/SigHandler.cpp
-  ./source/SLSWrapper.cpp
-  ./source/Statistics.cpp
-  ./source/SubproblemCondor.cpp
-  ./source/SubprobStats.cpp
-  ./source/utils.cpp
-  ./source/pseudotree.cpp
-)
+file(GLOB FILES "${CMAKE_CURRENT_LIST_DIR}/source/*.cpp")
 
 # Main executable and library dependencies
-set (CMAKE_INSTALL_PREFIX ../../..)
-#link_directories(../../../lib64)
-include_directories(../../include)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+endif()
+include_directories(${INCLUDE_DIR} ${CMAKE_INSTALL_PREFIX}/include)
+link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+
+message(STATUS "TOP: ${CMAKE_INSTALL_PREFIX}")
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "dir='${dir}'")
+endforeach()
+
+add_executable(daoopt daoopt.cpp ${FILES})
+target_link_libraries(daoopt bn-to-cnf ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 project(pseudotree)
 add_library(pseudotree STATIC ${FILES})
-target_link_libraries(pseudotree libbn-to-cnf.a)
-#target_link_libraries(pseudotree ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(pseudotree bn-to-cnf)
 
 set_target_properties(pseudotree PROPERTIES PUBLIC_HEADER "./include/Pseudotree.h")
 install(TARGETS pseudotree
-    ARCHIVE DESTINATION "lib64"
-    LIBRARY DESTINATION "lib64"
+    ARCHIVE DESTINATION "lib"
+    LIBRARY DESTINATION "lib"
     PUBLIC_HEADER DESTINATION "include/pseudotree"
 )
 

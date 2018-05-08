@@ -3,10 +3,14 @@
 
 #include <bn-to-cnf/bayesnet.h>
 
-class test {
-    test(int argc, char** argv);
+namespace pseudotree {
+
+class PseudoTree {
+    PseudoTree(int argc, char** argv);
 
 };
+
+}
 
 #endif
 

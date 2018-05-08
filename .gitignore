@@ -1,6 +1,8 @@
 .cproject*
 .project*
 .settings
-build
 *.d
 *.o
+/build
+/debug
+

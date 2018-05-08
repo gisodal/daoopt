@@ -1,7 +1,9 @@
 #include "pseudotree.h"
 #include "Main.h"
 
-test::test(int argc, char** argv){
+namespace pseudotree {
+
+PseudoTree::PseudoTree(int argc, char** argv){
 
 
     /* define to enable diagnostic output of memory stats */
@@ -41,4 +43,4 @@ test::test(int argc, char** argv){
 
 
 }
-
+}
