@@ -60,7 +60,7 @@ include_directories(
 
 # Libraries in the lib folder via recursive CMakeLists.txt
 add_subdirectory(lib)
-set(LIBS Gzstream Sls4mpe Mex Cvo)
+set(LIBS Gzstream Sls4mpe Mex Cvo Zlib)
 
 # Main daoopt source files
 file(GLOB FILES "${CMAKE_CURRENT_LIST_DIR}/source/*.cpp")
@@ -74,18 +74,47 @@ include_directories(${INCLUDE_DIR} ${CMAKE_INSTALL_PREFIX}/include)
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 
 set(PROJECT "daoopt")
-add_executable(${PROJECT}-bin daoopt.cpp ${FILES})
-set_target_properties(${PROJECT}-bin PROPERTIES OUTPUT_NAME ${PROJECT})
-target_link_libraries(${PROJECT}-bin ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-add_library(${PROJECT} STATIC ${FILES})
-target_link_libraries(${PROJECT} ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+add_library(${PROJECT}-base STATIC ${FILES})
+
+include_directories(${CMAKE_CURRENT_DIR})
+set(DAOOPT_LIBRARY "libdaoopt.a")
+add_custom_command(
+    OUTPUT ${DAOOPT_LIBRARY}
+    COMMAND echo create ${DAOOPT_LIBRARY}           >  build-lib.mri
+    COMMAND echo addlib $<TARGET_FILE:Sls4mpe>      >> build-lib.mri
+    COMMAND echo addlib $<TARGET_FILE:Mex>          >> build-lib.mri
+    COMMAND echo addlib $<TARGET_FILE:Cvo>          >> build-lib.mri
+    COMMAND echo addlib $<TARGET_FILE:daoopt-base>  >> build-lib.mri
+    COMMAND echo addlib $<TARGET_FILE:Zlib>         >> build-lib.mri
+    COMMAND echo addlib $<TARGET_FILE:Gzstream>     >> build-lib.mri
+    COMMAND echo save                               >> build-lib.mri
+    COMMAND echo end                                >> build-lib.mri
+    COMMAND ar -M < build-lib.mri
+    DEPENDS Gzstream Sls4mpe Mex Cvo ${PROJECT}-base
+    COMMENT "Create ${DAOOPT_LIBRARY}"
+)
+add_custom_target(${PROJECT}-gen DEPENDS ${DAOOPT_LIBRARY})
+add_library(${PROJECT}-lib STATIC IMPORTED)
+set_property(TARGET ${PROJECT}-lib PROPERTY IMPORTED_LOCATION ${DAOOPT_LIBRARY})
+add_dependencies(${PROJECT}-lib ${PROJECT}-gen)
+
+add_executable(${PROJECT}-bin daoopt.cpp)
+set_target_properties(${PROJECT}-bin PROPERTIES OUTPUT_NAME ${PROJECT})
+target_link_libraries(${PROJECT}-bin ${PROJECT}-lib ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 file(GLOB HEADERS "${INCLUDE_DIR}/*.h")
-set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${HEADERS}")
-install(TARGETS ${PROJECT}
-    ARCHIVE DESTINATION "lib"
-    LIBRARY DESTINATION "lib"
-    PUBLIC_HEADER DESTINATION "include/daoopt"
-)
+file(GLOB CVO_HEADERS "${CMAKE_CURRENT_LIST_DIR}/lib/cvo/*.hxx")
+file(GLOB MEX_HEADERS "${CMAKE_CURRENT_LIST_DIR}/lib/mex/*.h")
+file(GLOB SLS4MPE_HEADERS "${CMAKE_CURRENT_LIST_DIR}/lib/sls4mpe/*.h")
+file(GLOB ZLIB_HEADERS "${CMAKE_CURRENT_LIST_DIR}/lib/zlib/*.h")
+file(GLOB GZSTREAM_HEADERS "${CMAKE_CURRENT_LIST_DIR}/lib/*.h")
+
+install(FILES $<TARGET_FILE:daoopt-lib> DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
+install(FILES ${HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${PROJECT}")
+install(FILES ${CVO_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${PROJECT}/cvo")
+install(FILES ${MEX_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${PROJECT}/mex")
+install(FILES ${SLS4MPE_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${PROJECT}/sls4mpe")
+install(FILES ${ZLIB_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${PROJECT}/zlib")
+install(FILES ${GZSTREAM_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${PROJECT}")
 
