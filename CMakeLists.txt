@@ -25,11 +25,11 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -O0 -g3")
-set(CMAKE_C_FLAGS_DEBUG "-DDEBUG -O0 -g3")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -DDEBUG -O0 -g3")
+set(CMAKE_C_FLAGS_DEBUG "-Wall -Wextra -DDEBUG -O0 -g3")
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-set(CMAKE_C_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-w -O3")
+set(CMAKE_C_FLAGS_RELEASE "-w -O3")
 
 if(DAOOPT_LINK_STATIC)
   set(CMAKE_EXE_LINKER_FLAGS "-static")
@@ -69,28 +69,23 @@ file(GLOB FILES "${CMAKE_CURRENT_LIST_DIR}/source/*.cpp")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     get_filename_component(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 endif()
+set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 include_directories(${INCLUDE_DIR} ${CMAKE_INSTALL_PREFIX}/include)
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 
-message(STATUS "TOP: ${CMAKE_INSTALL_PREFIX}")
-get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-foreach(dir ${dirs})
-  message(STATUS "dir='${dir}'")
-endforeach()
+set(PROJECT "daoopt")
+add_executable(${PROJECT}-bin daoopt.cpp ${FILES})
+set_target_properties(${PROJECT}-bin PROPERTIES OUTPUT_NAME ${PROJECT})
+target_link_libraries(${PROJECT}-bin ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-add_executable(daoopt daoopt.cpp ${FILES})
-target_link_libraries(daoopt bn-to-cnf ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+add_library(${PROJECT} STATIC ${FILES})
+target_link_libraries(${PROJECT} ${LIBS} ${CMAKE_THREAD_LIBS_INIT} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-project(pseudotree)
-add_library(pseudotree STATIC ${FILES})
-target_link_libraries(pseudotree bn-to-cnf)
-
-set_target_properties(pseudotree PROPERTIES PUBLIC_HEADER "./include/Pseudotree.h")
-install(TARGETS pseudotree
+file(GLOB HEADERS "${INCLUDE_DIR}/*.h")
+set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${HEADERS}")
+install(TARGETS ${PROJECT}
     ARCHIVE DESTINATION "lib"
     LIBRARY DESTINATION "lib"
-    PUBLIC_HEADER DESTINATION "include/pseudotree"
+    PUBLIC_HEADER DESTINATION "include/daoopt"
 )
-
-
 
