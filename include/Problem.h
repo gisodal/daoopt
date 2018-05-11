@@ -16,7 +16,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with DAOOPT.  If not, see <http://www.gnu.org/licenses/>.
- *  
+ *
  *  Created on: Oct 10, 2008
  *      Author: Lars Otten <lotten@ics.uci.edu>
  */
@@ -31,9 +31,13 @@
 #include "_base.h"
 #include "gzstream.h"
 
+class bayesnet;
+
 namespace daoopt {
 
 /* holds a problem instance with variable domains and function tables */
+
+
 class Problem {
 
 protected:
@@ -101,6 +105,8 @@ public:
   bool hasDummy() const { return m_hasDummy; }
 
 public:
+    /* load a bayesian network */
+  bool loadBayesnet(::bayesnet *bn);
 
   /* parses a UAI format input file */
   bool parseUAI(const string& prob, const string& evid, const string& mmap);
