@@ -32,6 +32,7 @@
 #include "gzstream.h"
 
 class bayesnet;
+class partition_t;
 
 namespace daoopt {
 
@@ -106,7 +107,7 @@ public:
 
 public:
     /* load a bayesian network */
-  bool loadBayesnet(::bayesnet *bn);
+  bool loadBayesnet(::bayesnet *bn, const ::partition_t*);
 
   /* parses a UAI format input file */
   bool parseUAI(const string& prob, const string& evid, const string& mmap);
