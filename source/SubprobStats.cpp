@@ -41,11 +41,11 @@ const string LEGEND[] =
     "Kmin", "Kmax", "Kavg", "Ksdv", "Kmed",
     "Hmin", "Hmax", "Havg", "Hsdv", "Hmed" };
 
-template<typename T, size_t N> T* end(T (&ra)[N]) {
+template<typename T, size_t N> T* endl(T (&ra)[N]) {
   return ra + N;
 }
 
-const vector<string> SubprobStats::legend(LEGEND, end(LEGEND));
+const vector<string> SubprobStats::legend(LEGEND, endl(LEGEND));
 
 void SubprobStats::computeStats(const vector<int>& xs, double*& target) {
   double mini, maxi, avg, sdev, med;
